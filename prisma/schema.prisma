@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Transfer {
+  chainId        Int      @map("chain_id")
+  token          String
+  fromAddress    String   @map("from")
+  toAddress      String   @map("to")
+  amountHandle   String   @map("amount_handle")
+  amountClear    Decimal? @map("amount_clear") @db.Decimal(78, 0)
+  decryptStatus  String   @map("decrypt_status")
+  blockNumber    BigInt   @map("block_number")
+  blockTimestamp BigInt   @map("block_timestamp")
+  txHash         String   @map("tx_hash")
+  logIndex       Int      @map("log_index")
+
+  @@id([chainId, txHash, logIndex])
+  @@index([fromAddress], map: "transfer_from_idx")
+  @@index([toAddress], map: "transfer_to_idx")
+  @@index([chainId, decryptStatus], map: "transfer_retry_idx")
+  @@map("transfer")
+}
+
+model Balances {
+  chainId      Int     @map("chain_id")
+  token        String
+  address      String
+  netDecrypted Decimal @default(0) @map("net_decrypted") @db.Decimal(78, 0)
+  lastBlock    BigInt  @default(0) @map("last_block")
+
+  @@id([chainId, token, address])
+  @@index([address], map: "balance_address_idx")
+  @@map("balances")
+}
+
+model IndexerStatus {
+  chainId          Int    @id @map("chain_id")
+  lastIndexedBlock BigInt @map("last_indexed_block")
+
+  @@map("indexer_status")
+}
