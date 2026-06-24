@@ -1,14 +1,30 @@
 services:
-  app:
+  indexer:
     build: .
-    ports:
-      - "${API_PORT}:${API_PORT}"
+    command: ["npm", "run", "indexer:start"]
+    env_file:
+      - .env
     environment:
-      API_PORT: ${API_PORT}
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME}
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    build: .
+    command: ["npm", "run", "api:start"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/${DATABASE_NAME}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy
+      indexer:
+        condition: service_started
     restart: unless-stopped
 
   db:

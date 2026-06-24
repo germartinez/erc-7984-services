@@ -10,9 +10,16 @@
     "ethereum"
   ],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts",
+    "postinstall": "prisma generate",
+    "api:start": "tsx src/api/index.ts",
+    "api:dev": "tsx watch src/api/index.ts",
+    "indexer:dev": "prisma migrate deploy && tsx watch src/indexer/index.ts",
+    "indexer:start": "prisma migrate deploy && tsx src/indexer/index.ts",
+    "db:migrate": "prisma migrate deploy",
+    "db:generate": "prisma generate",
     "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
@@ -21,13 +28,16 @@
     "format:fix": "prettier --write \"**/*.{js,ts,json,md}\""
   },
   "dependencies": {
+    "@envio-dev/hypersync-client": "^1.4.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@zama-fhe/sdk": "^3.2.0-alpha.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "helmet": "^8.2.0",
     "pg": "^8.22.0",
+    "viem": "^2.53.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -35,10 +45,11 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.0.0",
     "@types/pg": "^8.20.0",
+    "pg-mem": "^3.0.14",
     "prettier": "^3.8.4",
     "prisma": "^7.8.0",
-    "ts-node": "^10.9.2",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^2.1.9"
   }
 }
