@@ -1,0 +1,35 @@
+{
+  "name": "erc-7984-services",
+  "description": "Indexer and API services for the ERC-7984",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "author": "Germán Martínez",
+  "keywords": [
+    "erc-7984",
+    "ethereum"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist node_modules",
+    "format:check": "prettier --check \"**/*.{js,ts,json,md}\"",
+    "format:fix": "prettier --write \"**/*.{js,ts,json,md}\""
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "helmet": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.0.0",
+    "prettier": "^3.8.4",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
