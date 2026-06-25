@@ -2,9 +2,8 @@
 
 A small TypeScript service that sits between the Zama Protocol and a wallet partner.
 It watches one ERC-7984 confidential token on Sepolia, decrypts the transfer
-amounts the indexer holder is entitled to (as a transfer party or via ACL
-delegation), and exposes a read-only API for cleartext balances and transfer
-history.
+amounts the indexer holder has been entitled to via ACL delegation, and exposes a
+read-only API for cleartext balances and transfer history.
 
 The core requirement: a transfer the holder cannot yet decrypt is never dropped
 Its encrypted amount handle is stored as `PENDING` and backfilled to cleartext

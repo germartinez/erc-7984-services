@@ -57,8 +57,9 @@ ciphertext handle and a `decryptStatus`. Decryption is attempted inline:
   resolve to "try again later," so they collapse to one persisted state and the
   reason string is kept for logs rather than the schema.
 
-Backfill is party-keyed, not handle-keyed. The base granularity of
-`isAllowed(handle, account)` is per (handle, account). But the grant event we
+Backfill is party-keyed, not handle-keyed. The base granularity of the
+entitlement check `isHandleDelegatedForUserDecryption(delegator, delegate,
+contractAddress, handle)` is per handle. But the grant event we
 watch `DelegatedForUserDecryption(delegator, delegate, contractAddress)`
 authorises the delegate to decrypt all of the delegator's handles for one
 contract, not a single handle. So when the holder is delegated to, the backfill
@@ -83,7 +84,7 @@ re-decrypt path, so this is a localised change, not a rewrite.
 ## 5. Tests: real DB, mock only the relayer seam
 
 Two tests, both driving the production path against an in-memory Postgres
-(`pg-mem`). The only seam stubbed is `tryDecrypt`.
+(`pg-mem`). The only seam stubbed is `tryDecryptAs`.
 
 - **Happy path:** a decryptable transfer → persisted `DECRYPTED`, recipient
   `+amount`, sender `-amount`.
