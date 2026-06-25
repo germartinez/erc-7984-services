@@ -2,17 +2,17 @@ import { Pool } from 'pg';
 import type { Hex } from 'viem';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { processTransfers } from '../src/indexer/lib/utils';
-import { tryDecrypt } from '../src/indexer/lib/zama';
+import { tryDecryptAs } from '../src/indexer/lib/zama';
 import { CHAIN_ID, RECIPIENT, SENDER, dbReader, resetDb, transferFrom } from './utils';
 
-vi.mock('../src/indexer/lib/zama', () => ({ tryDecrypt: vi.fn() }));
+vi.mock('../src/indexer/lib/zama', () => ({ tryDecryptAs: vi.fn() }));
 
 vi.mock('pg', async () => {
   const { createMemPg } = await import('./utils');
   return createMemPg();
 });
 
-const decrypt = vi.mocked(tryDecrypt);
+const decrypt = vi.mocked(tryDecryptAs);
 const db = dbReader(new Pool());
 
 describe('confidential transfer indexing (real db.ts on pg-mem)', () => {

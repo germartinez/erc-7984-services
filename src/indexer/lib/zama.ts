@@ -1,6 +1,9 @@
 import { config } from '@/config';
 import {
   DecryptionFailedError,
+  DelegationExpiredError,
+  DelegationNotFoundError,
+  DelegationNotPropagatedError,
   sepolia as fheSepolia,
   MemoryStorage,
   NoCiphertextError,
@@ -8,7 +11,14 @@ import {
 } from '@zama-fhe/sdk';
 import { node } from '@zama-fhe/sdk/node';
 import { createConfig } from '@zama-fhe/sdk/viem';
-import { createPublicClient, createWalletClient, http, type Hex, type PublicClient } from 'viem';
+import {
+  createPublicClient,
+  createWalletClient,
+  http,
+  type Address,
+  type Hex,
+  type PublicClient,
+} from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia as viemSepolia } from 'viem/chains';
 import { aclAbi } from '../abis/erc7984';
@@ -37,36 +47,44 @@ const sdk = new ZamaSDK(
 export const holderAddress = account.address;
 export const aclAddress = fheSepolia.aclContractAddress;
 
-export async function isEntitled(handle: Hex): Promise<boolean> {
+export async function isDelegated(handle: Hex, delegator: Address): Promise<boolean> {
   return publicClient.readContract({
     address: aclAddress,
     abi: aclAbi,
-    functionName: 'isAllowed',
-    args: [handle, holderAddress],
+    functionName: 'isHandleDelegatedForUserDecryption',
+    args: [delegator, holderAddress, config.token.address, handle],
   });
 }
 
-export async function tryDecrypt(handle: Hex): Promise<DecryptOutcome> {
-  let entitled: boolean;
+export async function tryDecryptAs(handle: Hex, delegator: Address): Promise<DecryptOutcome> {
+  let delegated: boolean;
   try {
-    entitled = await isEntitled(handle);
+    delegated = await isDelegated(handle, delegator);
   } catch (err) {
     return { kind: 'failed', reason: `acl-read: ${errMessage(err)}` };
   }
-  if (!entitled) {
-    return { kind: 'pending', reason: 'holder not entitled (ACL isAllowed=false)' };
+  if (!delegated) {
+    return { kind: 'pending', reason: 'no active delegation to holder (ACL)' };
   }
 
   try {
-    const result = await sdk.decryption.decryptValues([
-      { encryptedValue: handle, contractAddress: config.token.address },
-    ]);
+    const result = await sdk.decryption.delegatedDecryptValues(
+      [{ encryptedValue: handle, contractAddress: config.token.address }],
+      delegator,
+    );
     const value = result[handle];
     if (value === undefined) {
       return { kind: 'failed', reason: 'relayer returned no value for handle' };
     }
     return { kind: 'decrypted', value: BigInt(value as bigint | string) };
   } catch (err) {
+    if (
+      err instanceof DelegationNotFoundError ||
+      err instanceof DelegationExpiredError ||
+      err instanceof DelegationNotPropagatedError
+    ) {
+      return { kind: 'pending', reason: `no active delegation: ${errMessage(err)}` };
+    }
     if (err instanceof NoCiphertextError) {
       return { kind: 'pending', reason: 'no ciphertext available yet' };
     }

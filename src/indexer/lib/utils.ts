@@ -2,7 +2,7 @@ import type { Address, Hex } from 'viem';
 import { zeroAddress } from 'viem';
 import { commitRange } from './db';
 import type { DecryptOutcome } from './zama';
-import { tryDecrypt } from './zama';
+import { tryDecryptAs } from './zama';
 
 export type DecryptStatus = 'DECRYPTED' | 'PENDING';
 
@@ -63,6 +63,16 @@ export function balanceDeltas(
   return deltas;
 }
 
+async function decryptForTransfer(raw: RawTransfer): Promise<DecryptOutcome> {
+  let outcome: DecryptOutcome = { kind: 'pending', reason: 'no delegating party' };
+  for (const party of [raw.from, raw.to]) {
+    if (party.toLowerCase() === zeroAddress) continue;
+    outcome = await tryDecryptAs(raw.amountHandle, party);
+    if (outcome.kind === 'decrypted') break;
+  }
+  return outcome;
+}
+
 export async function processTransfers(
   chainId: number,
   transfers: RawTransfer[],
@@ -70,7 +80,7 @@ export async function processTransfers(
 ): Promise<number> {
   const items = [];
   for (const raw of transfers) {
-    const outcome = await tryDecrypt(raw.amountHandle);
+    const outcome = await decryptForTransfer(raw);
     const row = buildTransferRow(raw, outcome);
     const deltas = balanceDeltas(raw, row.amountClear ?? 0n, 'NONE', row.decryptStatus);
     items.push({ row, deltas });

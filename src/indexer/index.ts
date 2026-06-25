@@ -3,7 +3,7 @@ import type { Address, Hex } from 'viem';
 import { closeDb, commitBackfill, getLastBlockIndexed, getPendingByParty } from './lib/db';
 import { fetchRange, getHeight } from './lib/envio';
 import { applyOutcome, balanceDeltas, processTransfers } from './lib/utils';
-import { tryDecrypt } from './lib/zama';
+import { tryDecryptAs } from './lib/zama';
 
 const FINALITY_BLOCKS = 5;
 const POLL_INTERVAL_MS = 2000;
@@ -16,7 +16,7 @@ async function backfillDelegations(chainId: number, delegators: Address[]): Prom
   for (const delegator of new Set(delegators)) {
     const pending = await getPendingByParty(chainId, delegator);
     for (const row of pending) {
-      const outcome = await tryDecrypt(row.amountHandle as Hex);
+      const outcome = await tryDecryptAs(row.amountHandle as Hex, delegator);
       const { decryptStatus, amountClear } = applyOutcome(outcome);
 
       if (decryptStatus !== 'DECRYPTED' || amountClear === null) {

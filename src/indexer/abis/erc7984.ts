@@ -30,6 +30,18 @@ export const aclAbi = [
     outputs: [{ name: '', type: 'bool' }],
   },
   {
+    type: 'function',
+    name: 'isHandleDelegatedForUserDecryption',
+    stateMutability: 'view',
+    inputs: [
+      { name: 'delegator', type: 'address' },
+      { name: 'delegate', type: 'address' },
+      { name: 'contractAddress', type: 'address' },
+      { name: 'handle', type: 'bytes32' },
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
     type: 'event',
     name: 'DelegatedForUserDecryption',
     inputs: [
