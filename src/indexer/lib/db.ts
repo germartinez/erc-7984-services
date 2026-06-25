@@ -48,7 +48,7 @@ export async function commitRange(
     await client.query('BEGIN');
     for (const { row, deltas } of items) {
       const res = await client.query(
-        `INSERT INTO transfer
+        `INSERT INTO transfers
           (chain_id, token, "from", "to", amount_handle, amount_clear, decrypt_status, block_number, block_timestamp, tx_hash, log_index)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
         ON CONFLICT (chain_id, tx_hash, log_index) DO NOTHING`,
@@ -98,6 +98,7 @@ export interface PendingTransfer {
   blockNumber: bigint;
 }
 
+// TODO: Add pagination
 export async function getPendingByParty(
   chainId: number,
   party: string,
@@ -105,7 +106,7 @@ export async function getPendingByParty(
   const p = party.toLowerCase();
   const { rows } = await pool.query(
     `SELECT chain_id, tx_hash, log_index, "from", "to", token, amount_handle, decrypt_status, block_number
-     FROM transfer
+     FROM transfers
      WHERE chain_id = $1 AND decrypt_status = 'PENDING' AND ("from" = $2 OR "to" = $2)`,
     [chainId, p],
   );
@@ -132,7 +133,7 @@ export async function commitBackfill(
   try {
     await client.query('BEGIN');
     await client.query(
-      `UPDATE transfer
+      `UPDATE transfers
           SET decrypt_status = 'DECRYPTED', amount_clear = $4
         WHERE chain_id = $1 AND tx_hash = $2 AND log_index = $3`,
       [row.chainId, row.transactionHash.toLowerCase(), row.logIndex, amountClear.toString()],

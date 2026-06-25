@@ -2,7 +2,7 @@
 CREATE SCHEMA IF NOT EXISTS "public";
 
 -- CreateTable
-CREATE TABLE "transfer" (
+CREATE TABLE "transfers" (
     "chain_id" INTEGER NOT NULL,
     "token" TEXT NOT NULL,
     "from" TEXT NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE "transfer" (
     "tx_hash" TEXT NOT NULL,
     "log_index" INTEGER NOT NULL,
 
-    CONSTRAINT "transfer_pkey" PRIMARY KEY ("chain_id","tx_hash","log_index")
+    CONSTRAINT "transfers_pkey" PRIMARY KEY ("chain_id","tx_hash","log_index")
 );
 
 -- CreateTable
@@ -38,13 +38,13 @@ CREATE TABLE "indexer_status" (
 );
 
 -- CreateIndex
-CREATE INDEX "transfer_from_idx" ON "transfer"("from");
+CREATE INDEX "transfers_from_idx" ON "transfers"("from");
 
 -- CreateIndex
-CREATE INDEX "transfer_to_idx" ON "transfer"("to");
+CREATE INDEX "transfers_to_idx" ON "transfers"("to");
 
 -- CreateIndex
-CREATE INDEX "transfer_retry_idx" ON "transfer"("chain_id", "decrypt_status");
+CREATE INDEX "transfers_retry_idx" ON "transfers"("chain_id", "decrypt_status");
 
 -- CreateIndex
 CREATE INDEX "balance_address_idx" ON "balances"("address");

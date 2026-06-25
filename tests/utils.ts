@@ -8,7 +8,7 @@ export const SENDER = '0x1111111111111111111111111111111111111111' as Address;
 export const RECIPIENT = '0x2222222222222222222222222222222222222222' as Address;
 
 const SCHEMA_DDL = `
-  CREATE TABLE transfer (
+  CREATE TABLE transfers (
     chain_id int NOT NULL,
     token text NOT NULL,
     "from" text NOT NULL,
@@ -63,7 +63,7 @@ export function dbReader(reads: Pool) {
     async transferRow(txHash: string, logIndex: number) {
       const { rows } = await reads.query(
         `SELECT decrypt_status, amount_clear, amount_handle
-           FROM transfer WHERE chain_id = $1 AND tx_hash = $2 AND log_index = $3`,
+           FROM transfers WHERE chain_id = $1 AND tx_hash = $2 AND log_index = $3`,
         [CHAIN_ID, txHash, logIndex],
       );
       return rows[0];

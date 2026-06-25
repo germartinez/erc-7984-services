@@ -62,6 +62,7 @@ async function runIndexer(): Promise<void> {
     }
 
     if (delegators.length > 0) {
+      // TODO: Add delegator to a queue. An independent process will read the queue and backfill the delegations.
       await backfillDelegations(chainId, delegators);
     }
 

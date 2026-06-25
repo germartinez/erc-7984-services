@@ -9,7 +9,7 @@ export async function getTransfers(
 ): Promise<TransferItem[]> {
   const addr = address.toLowerCase();
 
-  const rows = await prisma.transfer.findMany({
+  const rows = await prisma.transfers.findMany({
     where: {
       chainId,
       OR: [{ fromAddress: addr }, { toAddress: addr }],
